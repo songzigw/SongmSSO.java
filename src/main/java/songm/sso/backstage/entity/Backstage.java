@@ -1,6 +1,5 @@
 package songm.sso.backstage.entity;
 
-import java.util.Date;
 
 public class Backstage {
 
@@ -8,11 +7,6 @@ public class Backstage {
     private String nonce;
     private long timestamp;
     private String signature;
-    private Date created;
-
-    public Backstage() {
-        this.created = new Date();
-    }
 
     public String getServerKey() {
         return serverKey;
@@ -44,10 +38,6 @@ public class Backstage {
 
     public void setSignature(String signature) {
         this.signature = signature;
-    }
-
-    public Date getCreated() {
-        return created;
     }
 
 }

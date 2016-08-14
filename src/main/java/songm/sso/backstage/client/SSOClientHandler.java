@@ -18,7 +18,7 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
-        LOG.debug("messageReceived: {}", ctx);
+        LOG.debug("messageReceived: {}", pro);
     }
 
     @Override

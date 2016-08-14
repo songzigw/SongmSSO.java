@@ -1,17 +1,21 @@
 package songm.sso.backstage.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import songm.sso.backstage.CodeUtils;
-import songm.sso.backstage.Config;
 import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 
 public class SSOClient {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SSOClient.class);
 
     private final String host;
     private final int port;
@@ -56,7 +60,9 @@ public class SSOClient {
         return port;
     }
 
-    private void connect() throws InterruptedException {
+    public void connect() throws InterruptedException {
+        LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
+
         Bootstrap b = new Bootstrap();
         b.group(group);
         b.channel(NioSocketChannel.class);
@@ -72,12 +78,21 @@ public class SSOClient {
             group.shutdownGracefully().sync();
         }
     }
+    
+    public void disconnect() {
+        if (channelFuture != null) {
+            channelFuture.channel().close().syncUninterruptibly();
+        }
+        if (group != null) {
+            group.shutdownGracefully();
+        }
+    }
 
     private void auth() {
         String nonce = String.valueOf(Math.random() * 1000000);
         long timestamp = System.currentTimeMillis();
-        StringBuilder toSign = new StringBuilder(serverSecret).append(nonce)
-                .append(timestamp);
+        StringBuilder toSign = new StringBuilder(serverSecret)
+                .append(nonce).append(timestamp);
         String sign = CodeUtils.sha1(toSign.toString());
 
         Backstage back = new Backstage();
@@ -96,9 +111,7 @@ public class SSOClient {
 
     public static void main(String[] args) throws Exception {
         SSOClient client = new SSOClient("127.0.0.1", 9090);
-        String key = Config.getInstance().getServerKey();
-        String secret = Config.getInstance().getServerSecret();
-        client.setServerKey(key, "iooo");
+        client.setServerKey("zhangsong", "123456");
         client.connect();
     }
 }
