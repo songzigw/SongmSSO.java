@@ -10,9 +10,6 @@ public class Backstage {
     private String signature;
     private Date created;
 
-    /** 后台唯一标识 */
-    private String backId;
-
     public Backstage() {
         this.created = new Date();
     }
@@ -51,10 +48,6 @@ public class Backstage {
 
     public Date getCreated() {
         return created;
-    }
-
-    public String getBackId() {
-        return backId;
     }
 
 }

@@ -19,12 +19,17 @@ import io.netty.channel.socket.SocketChannel;
 public class SSOClientInitializer extends ChannelInitializer<SocketChannel> {
 
     private ProtocolCodec protocolCodec;
-    private SSOClientHandler serverHandler;
+    private SSOClientHandler clientHandler;
 
+    public SSOClientInitializer() {
+        protocolCodec = new ProtocolCodec();
+        clientHandler = new SSOClientHandler();
+    }
+    
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline().addLast(protocolCodec);
-        ch.pipeline().addLast(serverHandler);
+        ch.pipeline().addLast(clientHandler);
     }
 
 }
