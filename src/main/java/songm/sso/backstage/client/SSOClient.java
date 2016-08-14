@@ -6,6 +6,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import songm.sso.backstage.CodeUtils;
+import songm.sso.backstage.Config;
 import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
@@ -38,16 +39,13 @@ public class SSOClient {
         return serverKey;
     }
 
-    public void setServerKey(String serverKey) {
-        this.serverKey = serverKey;
+    public void setServerKey(String key, String secret) {
+        this.serverKey = key;
+        this.serverSecret = secret;
     }
 
     public String getServerSecret() {
         return serverSecret;
-    }
-
-    public void setServerSecret(String serverSecret) {
-        this.serverSecret = serverSecret;
     }
 
     public String getHost() {
@@ -77,7 +75,7 @@ public class SSOClient {
 
     private void auth() {
         String nonce = String.valueOf(Math.random() * 1000000);
-        long timestamp = System.currentTimeMillis() / 1000;
+        long timestamp = System.currentTimeMillis();
         StringBuilder toSign = new StringBuilder(serverSecret).append(nonce)
                 .append(timestamp);
         String sign = CodeUtils.sha1(toSign.toString());
@@ -97,6 +95,10 @@ public class SSOClient {
     }
 
     public static void main(String[] args) throws Exception {
-        new SSOClient("127.0.0.1", 9090).connect();
+        SSOClient client = new SSOClient("127.0.0.1", 9090);
+        String key = Config.getInstance().getServerKey();
+        String secret = Config.getInstance().getServerSecret();
+        client.setServerKey(key, "iooo");
+        client.connect();
     }
 }

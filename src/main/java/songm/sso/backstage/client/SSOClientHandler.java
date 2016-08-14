@@ -15,7 +15,6 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     private static final Logger LOG = LoggerFactory
             .getLogger(SSOClientHandler.class);
 
-
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
