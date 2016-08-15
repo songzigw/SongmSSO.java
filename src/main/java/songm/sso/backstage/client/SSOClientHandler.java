@@ -7,6 +7,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import songm.sso.backstage.JsonUtils;
+import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 
 @ChannelHandler.Sharable
@@ -19,6 +21,11 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
         LOG.debug("messageReceived: {}", pro);
+        int op = pro.getOperation();
+        if (op == 1) {
+            Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
+            
+        }
     }
 
     @Override

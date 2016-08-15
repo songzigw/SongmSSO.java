@@ -19,9 +19,6 @@ import java.util.Map;
  */
 public class Session {
 
-	/** 默认超时间 */
-	public static final long TIME_OUT = 1000 * 24 * 60 * 60;
-
 	/** 客户端与服务端会话唯一标示符 */
 	public static final String CLIENT_KEY = "songm_sso_key";
 
@@ -84,10 +81,4 @@ public class Session {
 		accessTime = new Date();
 	}
 
-	public boolean isTimeout() {
-		if (new Date().getTime() - accessTime.getTime() > TIME_OUT) {
-			return true;
-		}
-		return false;
-	}
 }
