@@ -14,8 +14,10 @@ import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.event.AbstractListener;
+import songm.sso.backstage.event.ActionEvent;
+import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
-import songm.sso.backstage.event.ClientListener;
 
 public class SSOClient {
 
@@ -24,7 +26,7 @@ public class SSOClient {
     private final String host;
     private final int port;
 
-    private String backId;
+    private Backstage backstage;
     private String serverKey;
     private String serverSecret;
 
@@ -39,8 +41,18 @@ public class SSOClient {
         this.host = host;
         this.port = port;
         this.group = new NioEventLoopGroup();
-        this.clientInit = new SSOClientInitializer();
         this.listenerManager = new ActionListenerManager();
+        this.clientInit = new SSOClientInitializer(listenerManager);
+        this.init();
+    }
+    
+    private void init() {
+        listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                
+            }
+        });
     }
 
     public static SSOClient getInstance() {
@@ -55,8 +67,8 @@ public class SSOClient {
         return instance;
     }
 
-    public String getBackId() {
-        return backId;
+    public Backstage getBacstage() {
+        return backstage;
     }
 
     public String getServerKey() {
@@ -79,6 +91,10 @@ public class SSOClient {
         LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
         this.serverKey = key;
         this.serverSecret = secret;
+
+        ActionEvent event = new ActionEvent(ActionEvent.EventType.CONNECTING,
+                String.format("host=%s, post=%d", host, port));
+        listenerManager.trigger(event);
 
         Bootstrap b = new Bootstrap();
         b.group(group);
@@ -115,22 +131,18 @@ public class SSOClient {
                 .append(timestamp);
         String sign = CodeUtils.sha1(toSign.toString());
 
-        Backstage back = new Backstage();
-        back.setServerKey(serverKey);
-        back.setNonce(nonce);
-        back.setTimestamp(timestamp);
-        back.setSignature(sign);
+        backstage = new Backstage();
+        backstage.setServerKey(serverKey);
+        backstage.setNonce(nonce);
+        backstage.setTimestamp(timestamp);
+        backstage.setSignature(sign);
 
         Protocol proto = new Protocol();
         proto.setVersion((short) 1);
         proto.setOperation(0);
-        proto.setBody(JsonUtils.toJson(back).getBytes());
+        proto.setBody(JsonUtils.toJson(backstage).getBytes());
 
         channelFuture.channel().writeAndFlush(proto);
-    }
-
-    public void addListener(ClientListener listener) {
-        listenerManager.addListener(listener);
     }
 
     public static void main(String[] args) throws Exception {

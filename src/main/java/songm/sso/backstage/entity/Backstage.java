@@ -8,6 +8,9 @@ public class Backstage {
     private long timestamp;
     private String signature;
 
+    /** 后台客户端唯一标识 */
+    private String backId;
+    
     public String getServerKey() {
         return serverKey;
     }
@@ -38,6 +41,14 @@ public class Backstage {
 
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public String getBackId() {
+        return backId;
+    }
+
+    public void setBackId(String backId) {
+        this.backId = backId;
     }
 
 }

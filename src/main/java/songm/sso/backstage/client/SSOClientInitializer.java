@@ -5,6 +5,7 @@
 
 package songm.sso.backstage.client;
 
+import songm.sso.backstage.event.ActionListenerManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
@@ -21,9 +22,9 @@ public class SSOClientInitializer extends ChannelInitializer<SocketChannel> {
     private ProtocolCodec protocolCodec;
     private SSOClientHandler clientHandler;
 
-    public SSOClientInitializer() {
+    public SSOClientInitializer(ActionListenerManager listenerManager) {
         protocolCodec = new ProtocolCodec();
-        clientHandler = new SSOClientHandler();
+        clientHandler = new SSOClientHandler(listenerManager);
     }
     
     @Override
