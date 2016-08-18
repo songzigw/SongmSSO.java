@@ -1,14 +1,44 @@
+/*
+ * Copyright [2016] [zhangsong <songm.cn>].
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package songm.sso.backstage.entity;
 
-public class Protocol {
-    public static final short HEADER_LENGTH = 16;
-    public static final short VERSION = 1;
+import java.io.Serializable;
 
-    private int packetLen;
-    private short headerLen;
+/**
+ * 客户端与服务端的通信协议
+ *
+ * @author  zhangsong
+ * @since   0.1, 2016-7-29
+ * @version 0.1
+ * 
+ */
+public class Protocol implements Serializable {
+
+    private static final long serialVersionUID = -2248847428423474685L;
+
+    public static final short VERSION = 1;
+    public static final short HEADER_LEN = 20;
+
     private short version;
+    private short headerLen;
     private int operation;
     private long sequence;
+    private int packetLen;
     private byte[] body;
 
     public int getPacketLen() {
