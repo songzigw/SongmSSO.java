@@ -34,6 +34,7 @@ import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
+import songm.sso.backstage.event.ClientListener;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 
@@ -62,6 +63,7 @@ public class SSOClient implements ISSOClient {
     private final EventLoopGroup group;
     private final SSOClientInitializer clientInit;
     private ChannelFuture channelFuture;
+    private ClientListener listener;
 
     private static SSOClient instance;
 
@@ -78,7 +80,29 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                
+                backstage = (Backstage) event.getData();
+                if (listener != null) {
+                    listener.onConnected();
+                }
+            }
+        });
+        
+        listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (listener != null) {
+                    listener.onConnecting();
+                }
+            }
+        });
+        
+        listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (listener != null) {
+                    listener.onConnecting();
+                }
+                listener.onConnected();
             }
         });
     }
@@ -95,26 +119,32 @@ public class SSOClient implements ISSOClient {
         return instance;
     }
 
+    @Override
     public Backstage getBacstage() {
         return backstage;
     }
 
+    @Override
     public String getServerKey() {
         return serverKey;
     }
 
+    @Override
     public String getServerSecret() {
         return serverSecret;
     }
 
+    @Override
     public String getHost() {
         return host;
     }
 
+    @Override
     public int getPort() {
         return port;
     }
 
+    @Override
     public void connect(String key, String secret) throws SSOException {
         LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
         this.serverKey = key;
@@ -143,6 +173,7 @@ public class SSOClient implements ISSOClient {
         }
     }
 
+    @Override
     public void disconnect() {
         if (channelFuture != null) {
             channelFuture.channel().close().syncUninterruptibly();
@@ -172,6 +203,11 @@ public class SSOClient implements ISSOClient {
         channelFuture.channel().writeAndFlush(proto);
     }
 
+    @Override
+    public void addListener(ClientListener listener) {
+        this.listener = listener;
+    }
+    
     public static void main(String[] args) throws Exception {
         SSOClient client = SSOClient.init("127.0.0.1", 9090);
         client.connect("zhangsong", "123456");

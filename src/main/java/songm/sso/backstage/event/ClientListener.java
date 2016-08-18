@@ -4,10 +4,10 @@ import java.util.EventListener;
 
 public abstract class ClientListener implements EventListener {
 
-    protected abstract void onConnecting();
+    public abstract void onConnecting();
 
-    protected abstract void onConnected();
+    public abstract void onConnected();
 
-    protected abstract void onDisconnected();
+    public abstract void onDisconnected();
 
 }
