@@ -1,3 +1,20 @@
+/*
+ * Copyright [2016] [zhangsong <songm.cn>].
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package songm.sso.backstage.client;
 
 import io.netty.bootstrap.Bootstrap;
@@ -10,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import songm.sso.backstage.CodeUtils;
+import songm.sso.backstage.ISSOClient;
 import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.entity.Backstage;
@@ -19,7 +37,17 @@ import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 
-public class SSOClient {
+/**
+ * 后台客户端的实现
+ *
+ * @author  zhangsong
+ * @since   0.1, 2016-7-29
+ * @version 0.1
+ * 
+ * @see #ISSOClient
+ * 
+ */
+public class SSOClient implements ISSOClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(SSOClient.class);
 
@@ -138,8 +166,7 @@ public class SSOClient {
         backstage.setSignature(sign);
 
         Protocol proto = new Protocol();
-        proto.setVersion((short) 1);
-        proto.setOperation(0);
+        proto.setOperation(Operation.AUTH_REQUEST.getValue());
         proto.setBody(JsonUtils.toJson(backstage).getBytes());
 
         channelFuture.channel().writeAndFlush(proto);
