@@ -30,6 +30,7 @@ import songm.sso.backstage.CodeUtils;
 import songm.sso.backstage.ISSOClient;
 import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.SSOException;
+import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.event.AbstractListener;
@@ -77,16 +78,6 @@ public class SSOClient implements ISSOClient {
     }
     
     private void init() {
-        listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                backstage = (Backstage) event.getData();
-                if (listener != null) {
-                    listener.onConnected();
-                }
-            }
-        });
-        
         listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -96,13 +87,23 @@ public class SSOClient implements ISSOClient {
             }
         });
         
+        listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                backstage = (Backstage) event.getData();
+                if (listener != null) {
+                    listener.onConnected(backstage);
+                }
+            }
+        });
+        
         listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                String code = (String) event.getData();
                 if (listener != null) {
-                    listener.onConnecting();
+                    listener.onDisconnected(ErrorCode.valueOf(code));
                 }
-                listener.onConnected();
             }
         });
     }
@@ -167,7 +168,7 @@ public class SSOClient implements ISSOClient {
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Connect failure", e);
-            throw new SSOException("connect", e);
+            throw new SSOException(ErrorCode.CONN_START, "connect", e);
         } finally {
             disconnect();
         }
