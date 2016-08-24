@@ -44,10 +44,12 @@ public class ActionListenerManager {
     /**
      * 事件触发
      * 
-     * @param event
+     * @param type
+     * @param data
+     * @param sequence
      */
-    public void trigger(ActionEvent event) {
-        EventType type = event.getSource();
+    public void trigger(EventType type, Object data, Long sequence) {
+        ActionEvent event = new ActionEvent(type, data, sequence);
         Set<ActionListener> lers = listeners.get(type);
         if (lers == null) {
             return;
@@ -55,7 +57,13 @@ public class ActionListenerManager {
 
         for (ActionListener ler : lers) {
             if (ler != null) {
-                ler.actionPerformed(event);
+                if (ler.getSequence() == null) {
+                    ler.actionPerformed(event);
+                } else if (ler.getSequence().equals(sequence)) {
+                    ler.actionPerformed(event);
+                    removeListener(type, ler);
+                    break;
+                }
             }
         }
     }

@@ -134,9 +134,7 @@ public class SSOClient implements ISSOClient {
     public void connect(String key, String secret) throws SSOException {
         LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
 
-        ActionEvent event = new ActionEvent(ActionEvent.EventType.CONNECTING,
-                String.format("host=%s, post=%d", host, port));
-        listenerManager.trigger(event);
+        listenerManager.trigger(EventType.CONNECTING, key, null);
 
         Bootstrap b = new Bootstrap();
         b.group(group);

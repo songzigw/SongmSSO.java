@@ -3,7 +3,7 @@ package songm.sso.backstage.event;
 public abstract class AbstractListener implements ActionListener {
 
     @Override
-    public void setSequence(long sequence) {
+    public void setSequence(Long sequence) {
     }
 
     @Override

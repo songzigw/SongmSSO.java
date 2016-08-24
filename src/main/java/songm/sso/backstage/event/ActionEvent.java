@@ -10,9 +10,10 @@ public class ActionEvent extends EventObject {
 
     private Object data;
 
-    public ActionEvent(EventType source, Object data) {
+    public ActionEvent(EventType source, Object data, Long sequece) {
         super(source);
         this.data = data;
+        this.sequence = sequece;
     }
 
     @Override
@@ -29,6 +30,9 @@ public class ActionEvent extends EventObject {
     }
 
     public static enum EventType {
+        /** 请求后应答 */
+        RESPONSE,
+        
         /** 正在连接 */
         CONNECTING,
         /** 连接上了 */

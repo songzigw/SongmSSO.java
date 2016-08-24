@@ -4,7 +4,7 @@ import java.util.EventListener;
 
 public interface ActionListener extends EventListener {
 
-    public void setSequence(long sequence);
+    public void setSequence(Long sequence);
 
     public Long getSequence();
 

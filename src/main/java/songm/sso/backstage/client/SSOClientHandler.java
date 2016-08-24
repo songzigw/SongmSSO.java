@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import songm.sso.backstage.ISSOClient.Operation;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
-import songm.sso.backstage.event.ActionEvent;
+import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -70,13 +70,11 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
 
     private void triggerConnAuth(Protocol pro) {
         Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
-        ActionEvent event = null;
         if (back.getSucceed()) {
-            event = new ActionEvent(ActionEvent.EventType.CONNECTED, back);
+            listenerManager.trigger(EventType.CONNECTED, back, null);
         } else {
-            event = new ActionEvent(ActionEvent.EventType.DISCONNECTED, back);
+            listenerManager.trigger(EventType.DISCONNECTED, back, null);
         }
-        listenerManager.trigger(event);
     }
 
     @Override
