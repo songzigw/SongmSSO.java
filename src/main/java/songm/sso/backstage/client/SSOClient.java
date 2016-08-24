@@ -56,8 +56,6 @@ public class SSOClient implements ISSOClient {
     private final String host;
     private final int port;
 
-    private Backstage backstage;
-
     private final ActionListenerManager listenerManager;
     private final EventLoopGroup group;
     private final SSOClientInitializer clientInit;
@@ -74,7 +72,8 @@ public class SSOClient implements ISSOClient {
         this.clientInit = new SSOClientInitializer(listenerManager);
         this.init();
     }
-    
+
+    private Backstage backstage;
     private void init() {
         listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
             @Override
@@ -98,9 +97,10 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                String code = (String) event.getData();
+                backstage = (Backstage) event.getData();
                 if (listener != null) {
-                    listener.onDisconnected(ErrorCode.valueOf(code));
+                    listener.onDisconnected(ErrorCode.valueOf(
+                            backstage.getErrorCode()));
                 }
             }
         });
