@@ -24,7 +24,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import songm.sso.backstage.ISSOClient;
+import songm.sso.backstage.ISSOClient.Operation;
 import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
@@ -34,8 +34,8 @@ import songm.sso.backstage.event.ActionListenerManager;
 /**
  * 事件消息处理
  *
- * @author  zhangsong
- * @since   0.1, 2016-7-29
+ * @author zhangsong
+ * @since 0.1, 2016-7-29
  * @version 0.1
  * 
  */
@@ -55,13 +55,28 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
         LOG.debug("messageReceived: {}", pro);
-        int op = pro.getOperation();
-        if (op == ISSOClient.Operation.AUTH_SUCCEED.getValue()) {
-            Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
-            ActionEvent event = new ActionEvent(
-                    ActionEvent.EventType.CONNECTED, back);
-            listenerManager.trigger(event);
+
+        for (Operation oper : Operation.values()) {
+            if (oper.getValue() == pro.getOperation()) {
+                if (oper.equals(Operation.CONN_AUTH)) {
+                    triggerConnAuth(pro);
+                } else {
+
+                }
+                break;
+            }
         }
+    }
+
+    private void triggerConnAuth(Protocol pro) {
+        Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
+        ActionEvent event = null;
+        if (back.getSucceed()) {
+            event = new ActionEvent(ActionEvent.EventType.CONNECTED, back);
+        } else {
+            event = new ActionEvent(ActionEvent.EventType.DISCONNECTED, back);
+        }
+        listenerManager.trigger(event);
     }
 
     @Override

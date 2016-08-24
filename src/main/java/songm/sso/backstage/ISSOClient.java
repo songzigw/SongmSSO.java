@@ -17,11 +17,10 @@
 
 package songm.sso.backstage;
 
-import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.event.ClientListener;
 
 /**
- * 后台客户端
+ * 后台客户端接口
  *
  * @author zhangsong
  * @since 0.1, 2016-7-29
@@ -30,16 +29,6 @@ import songm.sso.backstage.event.ClientListener;
  */
 public interface ISSOClient {
 
-    public Backstage getBacstage();
-
-    public String getServerKey();
-
-    public String getServerSecret();
-
-    public String getHost();
-
-    public int getPort();
-    
     public void addListener(ClientListener listener);
 
     public void connect(String key, String secret) throws SSOException;
@@ -47,14 +36,18 @@ public interface ISSOClient {
     public void disconnect();
 
     public static enum Operation {
-        /** 授权 */
-        AUTH_REQUEST(1), AUTH_SUCCEED(2), AUTH_FAIL(3),
+        /** 连接授权 */
+        CONN_AUTH(1),
 
         /** 用户报道 */
-        USER_REPORT(4),
+        USER_REPORT(2),
 
-        /** Session */
-        SESSION_CREATE(5), SESSION_UPDATE(6), SESSION_REMOVE(7);
+        /** Session Create */
+        SESSION_CREATE(3),
+        /** Session Update */
+        SESSION_UPDATE(4),
+        /** Session Revove */
+        SESSION_REMOVE(5);
 
         private final int value;
 
@@ -62,7 +55,7 @@ public interface ISSOClient {
             this.value = value;
         }
 
-        public int getValue() {
+        public final int getValue() {
             return value;
         }
 

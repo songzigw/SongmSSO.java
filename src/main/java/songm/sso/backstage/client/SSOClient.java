@@ -57,8 +57,6 @@ public class SSOClient implements ISSOClient {
     private final int port;
 
     private Backstage backstage;
-    private String serverKey;
-    private String serverSecret;
 
     private final ActionListenerManager listenerManager;
     private final EventLoopGroup group;
@@ -120,27 +118,14 @@ public class SSOClient implements ISSOClient {
         return instance;
     }
 
-    @Override
     public Backstage getBacstage() {
         return backstage;
     }
 
-    @Override
-    public String getServerKey() {
-        return serverKey;
-    }
-
-    @Override
-    public String getServerSecret() {
-        return serverSecret;
-    }
-
-    @Override
     public String getHost() {
         return host;
     }
 
-    @Override
     public int getPort() {
         return port;
     }
@@ -148,8 +133,6 @@ public class SSOClient implements ISSOClient {
     @Override
     public void connect(String key, String secret) throws SSOException {
         LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
-        this.serverKey = key;
-        this.serverSecret = secret;
 
         ActionEvent event = new ActionEvent(ActionEvent.EventType.CONNECTING,
                 String.format("host=%s, post=%d", host, port));
@@ -164,11 +147,11 @@ public class SSOClient implements ISSOClient {
         try {
             // 与服务器建立连接
             channelFuture = b.connect().sync();
-            this.auth();
+            this.auth(key, secret);
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Connect failure", e);
-            throw new SSOException(ErrorCode.CONN_START, "connect", e);
+            throw new SSOException(ErrorCode.CONN_ERROR, "connect", e);
         } finally {
             disconnect();
         }
@@ -184,21 +167,21 @@ public class SSOClient implements ISSOClient {
         }
     }
 
-    private void auth() {
+    private void auth(String key, String secret) {
         String nonce = String.valueOf(Math.random() * 1000000);
         long timestamp = System.currentTimeMillis();
-        StringBuilder toSign = new StringBuilder(serverSecret).append(nonce)
-                .append(timestamp);
+        StringBuilder toSign = new StringBuilder(secret)
+                        .append(nonce).append(timestamp);
         String sign = CodeUtils.sha1(toSign.toString());
 
         backstage = new Backstage();
-        backstage.setServerKey(serverKey);
+        backstage.setServerKey(key);
         backstage.setNonce(nonce);
         backstage.setTimestamp(timestamp);
         backstage.setSignature(sign);
 
         Protocol proto = new Protocol();
-        proto.setOperation(Operation.AUTH_REQUEST.getValue());
+        proto.setOperation(Operation.CONN_AUTH.getValue());
         proto.setBody(JsonUtils.toJson(backstage).getBytes());
 
         channelFuture.channel().writeAndFlush(proto);

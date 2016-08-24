@@ -18,11 +18,11 @@ import java.util.Map;
  * @version 0.1
  * 
  */
-public class Session implements Serializable {
+public class Session extends Entity implements Serializable {
 
     private static final long serialVersionUID = 3367972053942347508L;
 
-    /** 客户端与服务端会话唯一标示符 */
+    /** 用户与服务端会话唯一标示符 */
 	public static final String CLIENT_KEY = "songm_sso_key";
 
 	/** 会话唯一标示 */

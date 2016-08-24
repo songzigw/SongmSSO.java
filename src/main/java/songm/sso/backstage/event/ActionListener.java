@@ -4,9 +4,9 @@ import java.util.EventListener;
 
 public interface ActionListener extends EventListener {
 
-    public void setSequence(long sequece);
+    public void setSequence(long sequence);
 
-    public Long getSequece();
+    public Long getSequence();
 
     public void actionPerformed(ActionEvent event);
 }

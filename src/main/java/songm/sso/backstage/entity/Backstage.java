@@ -27,7 +27,7 @@ import java.io.Serializable;
  * @version 0.1
  * 
  */
-public class Backstage implements Serializable {
+public class Backstage extends Entity implements Serializable {
 
     private static final long serialVersionUID = 2846096768501798052L;
 

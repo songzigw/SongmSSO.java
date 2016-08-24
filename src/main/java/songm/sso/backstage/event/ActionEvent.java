@@ -29,6 +29,11 @@ public class ActionEvent extends EventObject {
     }
 
     public static enum EventType {
-        CONNECTING, CONNECTED, DISCONNECTED,
+        /** 正在连接 */
+        CONNECTING,
+        /** 连接上了 */
+        CONNECTED,
+        /** 连接断开 */
+        DISCONNECTED,
     }
 }
