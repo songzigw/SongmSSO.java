@@ -26,18 +26,18 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import songm.sso.backstage.CodeUtils;
 import songm.sso.backstage.ISSOClient;
-import songm.sso.backstage.JsonUtils;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
-import songm.sso.backstage.event.ClientListener;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
+import songm.sso.backstage.event.ClientListener;
+import songm.sso.backstage.utils.CodeUtils;
+import songm.sso.backstage.utils.JsonUtils;
 
 /**
  * 后台客户端的实现
