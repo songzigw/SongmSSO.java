@@ -180,7 +180,7 @@ public class SSOClient implements ISSOClient {
 
         Protocol proto = new Protocol();
         proto.setOperation(Operation.CONN_AUTH.getValue());
-        proto.setBody(JsonUtils.toJson(backstage).getBytes());
+        proto.setBody(JsonUtils.toJson(backstage, Backstage.class).getBytes());
 
         channelFuture.channel().writeAndFlush(proto);
     }

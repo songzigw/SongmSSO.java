@@ -44,7 +44,7 @@ public class SSOClientTest {
             Protocol proto = new Protocol();
             proto.setVersion((short) 1);
             proto.setOperation(0);
-            proto.setBody(JsonUtils.toJson(acc).getBytes());
+            proto.setBody(JsonUtils.toJson(acc, Backstage.class).getBytes());
             f.channel().writeAndFlush(proto);
 
             f.channel().closeFuture().sync();
