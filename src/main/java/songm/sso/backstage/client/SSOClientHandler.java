@@ -54,17 +54,12 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
-        LOG.debug("messageReceived: {}", pro);
+        int oper = pro.getOperation();
 
-        for (Operation oper : Operation.values()) {
-            if (oper.getValue() == pro.getOperation()) {
-                if (oper.equals(Operation.CONN_AUTH)) {
-                    triggerConnAuth(pro);
-                } else {
+        if (oper == Operation.CONN_AUTH.getValue()) {
+            triggerConnAuth(pro);
+        } else {
 
-                }
-                break;
-            }
         }
     }
 
