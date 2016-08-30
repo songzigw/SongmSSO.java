@@ -74,12 +74,12 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        LOG.debug("handlerRemoved: {}", ctx);
+        LOG.debug("HandlerRemoved", ctx);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
-        LOG.error("exceptionCaught", cause);
+        LOG.error("ExceptionCaught", cause);
     }
 }
