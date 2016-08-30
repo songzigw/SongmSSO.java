@@ -17,7 +17,7 @@
 
 package songm.sso.backstage;
 
-import songm.sso.backstage.event.ClientListener;
+import songm.sso.backstage.event.ConnectionListener;
 
 /**
  * 后台客户端接口
@@ -29,7 +29,7 @@ import songm.sso.backstage.event.ClientListener;
  */
 public interface ISSOClient {
 
-    public void addListener(ClientListener listener);
+    public void addListener(ConnectionListener listener);
 
     public void connect(String key, String secret) throws SSOException;
 

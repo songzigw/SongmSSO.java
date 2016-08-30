@@ -22,14 +22,14 @@ import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Backstage;
 
 /**
- * 后台客户端事件监听器
+ * 连接事件监听器
  *
  * @author  zhangsong
  * @since   0.1, 2016-8-2
  * @version 0.1
  *
  */
-public abstract class ClientListener implements EventListener {
+public abstract class ConnectionListener implements EventListener {
 
     /**
      * 当正在连接时，被触发。

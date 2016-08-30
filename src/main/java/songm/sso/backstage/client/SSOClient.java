@@ -35,7 +35,7 @@ import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
-import songm.sso.backstage.event.ClientListener;
+import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.utils.CodeUtils;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -60,7 +60,7 @@ public class SSOClient implements ISSOClient {
     private final EventLoopGroup group;
     private final SSOClientInitializer clientInit;
     private ChannelFuture channelFuture;
-    private ClientListener listener;
+    private ConnectionListener connectionListener;
 
     private static SSOClient instance;
 
@@ -78,8 +78,8 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (listener != null) {
-                    listener.onConnecting();
+                if (connectionListener != null) {
+                    connectionListener.onConnecting();
                 }
             }
         });
@@ -88,8 +88,8 @@ public class SSOClient implements ISSOClient {
             @Override
             public void actionPerformed(ActionEvent event) {
                 backstage = (Backstage) event.getData();
-                if (listener != null) {
-                    listener.onConnected(backstage);
+                if (connectionListener != null) {
+                    connectionListener.onConnected(backstage);
                 }
             }
         });
@@ -98,8 +98,8 @@ public class SSOClient implements ISSOClient {
             @Override
             public void actionPerformed(ActionEvent event) {
                 backstage = (Backstage) event.getData();
-                if (listener != null) {
-                    listener.onDisconnected(ErrorCode.valueOf(
+                if (connectionListener != null) {
+                    connectionListener.onDisconnected(ErrorCode.valueOf(
                             backstage.getErrorCode()));
                 }
             }
@@ -186,8 +186,8 @@ public class SSOClient implements ISSOClient {
     }
 
     @Override
-    public void addListener(ClientListener listener) {
-        this.listener = listener;
+    public void addListener(ConnectionListener listener) {
+        this.connectionListener = listener;
     }
     
     public static void main(String[] args) throws Exception {
