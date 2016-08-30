@@ -53,11 +53,11 @@ public class SSOException extends Exception {
     }
 
     public static enum ErrorCode {
-        // 连接
+        // 连接-------------------
         /** 连接错误 */
         CONN_ERROR,
         
-        // 授权异常
+        // 授权异常---------------
         /** 授权失败 */
         AUTH_FAILURE,
         /** 授权失效 */
