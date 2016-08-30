@@ -24,6 +24,7 @@ public class ActionListenerManager {
         Set<ActionListener> lers = listeners.get(eventType);
         if (lers == null) {
             lers = new HashSet<ActionListener>();
+            listeners.put(eventType, lers);
         }
         lers.add(listener);
     }
@@ -36,7 +37,7 @@ public class ActionListenerManager {
     public void removeListener(EventType eventType, ActionListener listener) {
         Set<ActionListener> lers = listeners.get(eventType);
         if (lers == null) {
-            lers = new HashSet<ActionListener>();
+            return;
         }
         lers.remove(listener);
     }
