@@ -14,10 +14,8 @@
  * limitations under the License.
  * 
  */
-
 package songm.sso.backstage.entity;
 
-import java.io.Serializable;
 
 /**
  * 应用程序后台信息
@@ -27,7 +25,7 @@ import java.io.Serializable;
  * @version 0.1
  * 
  */
-public class Backstage extends Entity implements Serializable {
+public class Backstage extends Entity {
 
     private static final long serialVersionUID = 2846096768501798052L;
 

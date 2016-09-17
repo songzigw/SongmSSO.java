@@ -14,7 +14,6 @@
  * limitations under the License.
  * 
  */
-
 package songm.sso.backstage.entity;
 
 import java.io.Serializable;
