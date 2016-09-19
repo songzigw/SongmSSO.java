@@ -29,14 +29,14 @@ import songm.sso.backstage.entity.Entity;
  * @version 0.1
  *
  */
-public abstract class ResponseListener implements EventListener {
+public abstract class ResponseListener<T extends Entity> implements EventListener {
 
     /**
      * 当相应成功时
      * 
      * @param backstage
      */
-    public abstract void onSuccess(Entity entity);
+    public abstract void onSuccess(T entity);
 
     /**
      * 当产生错误时

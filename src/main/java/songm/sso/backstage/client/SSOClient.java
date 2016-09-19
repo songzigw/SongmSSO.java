@@ -17,29 +17,27 @@
 
 package songm.sso.backstage.client;
 
-import java.util.Date;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import songm.im.client.entity.Entity;
-import songm.im.client.entity.Message;
-import songm.im.client.event.ActionListener;
-import songm.im.client.handler.Handler;
 import songm.sso.backstage.ISSOClient;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
+import songm.sso.backstage.event.ActionListener;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
@@ -198,11 +196,13 @@ public class SSOClient implements ISSOClient {
     }
 
     @Override
-    public void report(String sessionId, ResponseListener response) {
+    public void report(String sessionId, ResponseListener<Session> response) {
+        Session session = new Session(sessionId);
+        
         Protocol proto = new Protocol();
-        proto.setOperation(Handler.Type.MSG_SEND.getValue());
+        proto.setOperation(ISSOClient.Operation.USER_REPORT.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(message, Message.class).getBytes());
+        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -218,7 +218,7 @@ public class SSOClient implements ISSOClient {
                 if (response == null) {
                     return;
                 }
-                Entity ent = (Entity) event.getData();
+                Session ent = (Session) event.getData();
                 if (ent.getSucceed()) {
                     response.onSuccess(ent);
                 } else {

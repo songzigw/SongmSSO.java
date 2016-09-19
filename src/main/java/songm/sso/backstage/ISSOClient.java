@@ -17,6 +17,7 @@
 
 package songm.sso.backstage;
 
+import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
 
@@ -70,5 +71,5 @@ public interface ISSOClient {
         }
     }
     
-    public void report(String sessionId, ResponseListener response);
+    public void report(String sessionId, ResponseListener<Session> response);
 }

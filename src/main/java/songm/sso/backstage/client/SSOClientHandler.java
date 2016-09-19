@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import songm.sso.backstage.ISSOClient.Operation;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.utils.JsonUtils;
@@ -59,7 +60,8 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
         if (oper == Operation.CONN_AUTH.getValue()) {
             triggerConnAuth(pro);
         } else if (oper == Operation.USER_REPORT.getValue()) {
-
+            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
+            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
         }
     }
 
