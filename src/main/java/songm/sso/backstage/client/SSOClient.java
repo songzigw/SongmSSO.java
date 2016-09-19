@@ -31,9 +31,12 @@ import org.slf4j.LoggerFactory;
 import songm.sso.backstage.ISSOClient;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
+import songm.sso.backstage.entity.Attribute;
 import songm.sso.backstage.entity.Backstage;
+import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.entity.Session;
+import songm.sso.backstage.entity.User;
 import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
@@ -219,6 +222,192 @@ public class SSOClient implements ISSOClient {
                     return;
                 }
                 Session ent = (Session) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public void login(String sessionId, String userId, String userInfo,
+            ResponseListener<Session> response) {
+        User user = new User();
+        user.setSesId(sessionId);
+        user.setUserId(userId);
+        user.setUserInfo(userInfo);
+        
+        Protocol proto = new Protocol();
+        proto.setOperation(ISSOClient.Operation.USER_LOGIN.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(user, User.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Session ent = (Session) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public void logout(String sessionId, ResponseListener<Session> response) {
+        Session session = new Session(sessionId);
+        
+        Protocol proto = new Protocol();
+        proto.setOperation(ISSOClient.Operation.USER_LOGOUT.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Session ent = (Session) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public void getSession(String sessionId, ResponseListener<Session> response) {
+        Session session = new Session(sessionId);
+        
+        Protocol proto = new Protocol();
+        proto.setOperation(ISSOClient.Operation.SESSION_GET.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Session ent = (Session) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public void setAttribute(String sessionId, String key, String value,
+            ResponseListener<Entity> response) {
+        Attribute attribute = new Attribute();
+        attribute.setSesId(sessionId);
+        attribute.setKey(key);
+        attribute.setValue(value);
+        
+        Protocol proto = new Protocol();
+        proto.setOperation(ISSOClient.Operation.SESSION_ATTR_SET.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Entity ent = (Entity) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public void getAttribute(String sessionId, String key,
+            ResponseListener<Attribute> response) {
+        Attribute attribute = new Attribute();
+        attribute.setSesId(sessionId);
+        attribute.setKey(key);
+        
+        Protocol proto = new Protocol();
+        proto.setOperation(ISSOClient.Operation.SESSION_ATTR_SET.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Attribute ent = (Attribute) event.getData();
                 if (ent.getSucceed()) {
                     response.onSuccess(ent);
                 } else {

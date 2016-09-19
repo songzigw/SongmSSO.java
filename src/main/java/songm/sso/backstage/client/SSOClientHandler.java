@@ -25,7 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import songm.sso.backstage.ISSOClient.Operation;
+import songm.sso.backstage.entity.Attribute;
 import songm.sso.backstage.entity.Backstage;
+import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ActionEvent.EventType;
@@ -62,6 +64,24 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
         } else if (oper == Operation.USER_REPORT.getValue()) {
             Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
             listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
+        } else if (oper == Operation.USER_LOGIN.getValue()) {
+            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
+            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
+        } else if (oper == Operation.USER_LOGOUT.getValue()) {
+            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
+            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
+        } else if (oper == Operation.USER_EDIT.getValue()) {
+            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
+            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
+        } else if (oper == Operation.SESSION_GET.getValue()) {
+            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
+            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
+        } else if (oper == Operation.SESSION_ATTR_GET.getValue()) {
+            Attribute attr = JsonUtils.fromJson(pro.getBody(), Attribute.class);
+            listenerManager.trigger(EventType.RESPONSE, attr, pro.getSequence());
+        } else if (oper == Operation.SESSION_ATTR_SET.getValue()) {
+            Entity ent = JsonUtils.fromJson(pro.getBody(), Entity.class);
+            listenerManager.trigger(EventType.RESPONSE, ent, pro.getSequence());
         }
     }
 

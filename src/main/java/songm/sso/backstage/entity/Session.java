@@ -33,10 +33,15 @@ public class Session extends Entity {
     private static final long serialVersionUID = 3367972053942347508L;
 
     /** 保存在客户端session标识 */
-    public static String USER_SESSION_KEY = "songm_session";
+    public static final String USER_SESSION_KEY = "songm_session";
+    
+    public static final String USER_INFO = "user_info";
 
     /** 会话唯一标示 */
 	private String sesId;
+
+	/** 用户ID */
+    private String userId;
 
 	/** 会话创建时间 */
 	private Date createdTime;
@@ -86,7 +91,15 @@ public class Session extends Entity {
 		return createdTime.getTime();
 	}
 
-	public long getAccessTime() {
+	public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public long getAccessTime() {
 		return accessTime.getTime();
 	}
 
@@ -94,4 +107,28 @@ public class Session extends Entity {
 		accessTime = new Date();
 	}
 
+	@Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((sesId == null) ? 0 : sesId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Session other = (Session) obj;
+        if (sesId == null) {
+            if (other.sesId != null)
+                return false;
+        } else if (!sesId.equals(other.sesId))
+            return false;
+        return true;
+    }
 }

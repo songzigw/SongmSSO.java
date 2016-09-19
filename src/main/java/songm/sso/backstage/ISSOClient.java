@@ -17,6 +17,8 @@
 
 package songm.sso.backstage;
 
+import songm.sso.backstage.entity.Attribute;
+import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
@@ -36,20 +38,44 @@ public interface ISSOClient {
     public void connect(String key, String secret) throws SSOException;
 
     public void disconnect();
+    
+    public void report(String sessionId, ResponseListener<Session> response);
+    
+    public void login(String sessionId, String userId, String userInfo, ResponseListener<Session> response);
+    
+    public void logout(String sessionId, ResponseListener<Session> response);
+    
+    public void getSession(String sessionId, ResponseListener<Session> response);
+    
+    public void setAttribute(String sessionId, String key, String value, ResponseListener<Entity> response);
 
+    public void getAttribute(String sessionId, String key, ResponseListener<Attribute> response);
+    
     public static enum Operation {
         /** 连接授权 */
         CONN_AUTH(1),
 
         /** 用户报道 */
         USER_REPORT(2),
+        /** 用户登入 */
+        USER_LOGIN(8),
+        /** 用户退出 */
+        USER_LOGOUT(9),
+        /** 用户信息编辑 */
+        USER_EDIT(10),
 
         /** Session Create */
-        SESSION_CREATE(3),
+        //SESSION_CREATE(3),
         /** Session Update */
-        SESSION_UPDATE(4),
+        //SESSION_UPDATE(4),
         /** Session Revove */
-        SESSION_REMOVE(5);
+        //SESSION_REMOVE(5)
+        /** Session属性设置 */
+        SESSION_ATTR_SET(6),
+        /** Session属性获取 */
+        SESSION_ATTR_GET(7),
+        /** Session对象获取 */
+        SESSION_GET(11);
 
         private final int value;
 
@@ -69,7 +95,5 @@ public interface ISSOClient {
             }
             return null;
         }
-    }
-    
-    public void report(String sessionId, ResponseListener<Session> response);
+    }    
 }
