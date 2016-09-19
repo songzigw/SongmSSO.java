@@ -58,7 +58,7 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
 
         if (oper == Operation.CONN_AUTH.getValue()) {
             triggerConnAuth(pro);
-        } else {
+        } else if (oper == Operation.USER_REPORT.getValue()) {
 
         }
     }

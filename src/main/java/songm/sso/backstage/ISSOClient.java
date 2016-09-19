@@ -18,6 +18,7 @@
 package songm.sso.backstage;
 
 import songm.sso.backstage.event.ConnectionListener;
+import songm.sso.backstage.event.ResponseListener;
 
 /**
  * 后台客户端接口
@@ -68,4 +69,6 @@ public interface ISSOClient {
             return null;
         }
     }
+    
+    public void report(String sessionId, ResponseListener response);
 }

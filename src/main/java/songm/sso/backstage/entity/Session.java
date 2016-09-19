@@ -32,7 +32,10 @@ public class Session extends Entity {
 
     private static final long serialVersionUID = 3367972053942347508L;
 
-	/** 会话唯一标示 */
+    /** 保存在客户端session标识 */
+    public static String USER_SESSION_KEY = "songm_session";
+
+    /** 会话唯一标示 */
 	private String sesId;
 
 	/** 会话创建时间 */

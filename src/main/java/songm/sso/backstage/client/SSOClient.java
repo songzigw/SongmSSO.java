@@ -17,6 +17,8 @@
 
 package songm.sso.backstage.client;
 
+import java.util.Date;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -26,6 +28,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import songm.im.client.entity.Entity;
+import songm.im.client.entity.Message;
+import songm.im.client.event.ActionListener;
+import songm.im.client.handler.Handler;
 import songm.sso.backstage.ISSOClient;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
@@ -36,6 +42,7 @@ import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.event.ConnectionListener;
+import songm.sso.backstage.event.ResponseListener;
 import songm.sso.backstage.utils.CodeUtils;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -189,9 +196,38 @@ public class SSOClient implements ISSOClient {
     public void addListener(ConnectionListener listener) {
         this.connectionListener = listener;
     }
-    
-    public static void main(String[] args) throws Exception {
-        SSOClient client = SSOClient.init("127.0.0.1", 9090);
-        client.connect("zhangsong", "123456");
+
+    @Override
+    public void report(String sessionId, ResponseListener response) {
+        Protocol proto = new Protocol();
+        proto.setOperation(Handler.Type.MSG_SEND.getValue());
+        proto.setSequence(new Date().getTime());
+        proto.setBody(JsonUtils.toJson(message, Message.class).getBytes());
+
+        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
+
+            private Long sequence = proto.getSequence();
+
+            @Override
+            public Long getSequence() {
+                return sequence;
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (response == null) {
+                    return;
+                }
+                Entity ent = (Entity) event.getData();
+                if (ent.getSucceed()) {
+                    response.onSuccess(ent);
+                } else {
+                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
+                }
+            }
+        });
+
+        channelFuture.channel().writeAndFlush(proto);
     }
+    
 }
