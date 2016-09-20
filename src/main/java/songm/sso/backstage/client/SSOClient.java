@@ -44,6 +44,7 @@ import songm.sso.backstage.event.ActionListener;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
+import songm.sso.backstage.handler.Handler.Operation;
 import songm.sso.backstage.utils.CodeUtils;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -181,7 +182,7 @@ public class SSOClient implements ISSOClient {
         }
     }
 
-    private void auth(String key, String secret) {
+    private void auth(String key, String secret) throws InterruptedException {
         String nonce = String.valueOf(Math.random() * 1000000);
         long timestamp = System.currentTimeMillis();
         StringBuilder toSign = new StringBuilder(secret)
@@ -198,7 +199,7 @@ public class SSOClient implements ISSOClient {
         proto.setOperation(Operation.CONN_AUTH.getValue());
         proto.setBody(JsonUtils.toJson(backstage, Backstage.class).getBytes());
 
-        channelFuture.channel().writeAndFlush(proto);
+        channelFuture.channel().writeAndFlush(proto).sync();
     }
 
     @Override
@@ -211,7 +212,7 @@ public class SSOClient implements ISSOClient {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.USER_REPORT.getValue());
+        proto.setOperation(Operation.USER_REPORT.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
 
@@ -250,7 +251,7 @@ public class SSOClient implements ISSOClient {
         user.setUserInfo(userInfo);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.USER_LOGIN.getValue());
+        proto.setOperation(Operation.USER_LOGIN.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(user, User.class).getBytes());
 
@@ -281,11 +282,11 @@ public class SSOClient implements ISSOClient {
     }
 
     @Override
-    public void logout(String sessionId, ResponseListener<Session> response) {
+    public void logout(String sessionId, ResponseListener<Entity> response) {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.USER_LOGOUT.getValue());
+        proto.setOperation(Operation.USER_LOGOUT.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
 
@@ -303,7 +304,7 @@ public class SSOClient implements ISSOClient {
                 if (response == null) {
                     return;
                 }
-                Session ent = (Session) event.getData();
+                Entity ent = (Entity) event.getData();
                 if (ent.getSucceed()) {
                     response.onSuccess(ent);
                 } else {
@@ -320,7 +321,7 @@ public class SSOClient implements ISSOClient {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.SESSION_GET.getValue());
+        proto.setOperation(Operation.SESSION_GET.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
 
@@ -352,14 +353,18 @@ public class SSOClient implements ISSOClient {
 
     @Override
     public void setAttribute(String sessionId, String key, String value,
-            ResponseListener<Entity> response) {
+            ResponseListener<Attribute> response) {
+        if (Session.USER_INFO.equals(key)) {
+            throw new IllegalArgumentException("Argument 'key' does not allow for " + key);
+        }
+        
         Attribute attribute = new Attribute();
         attribute.setSesId(sessionId);
         attribute.setKey(key);
         attribute.setValue(value);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.SESSION_ATTR_SET.getValue());
+        proto.setOperation(Operation.SESSION_ATTR_SET.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
 
@@ -377,7 +382,7 @@ public class SSOClient implements ISSOClient {
                 if (response == null) {
                     return;
                 }
-                Entity ent = (Entity) event.getData();
+                Attribute ent = (Attribute) event.getData();
                 if (ent.getSucceed()) {
                     response.onSuccess(ent);
                 } else {
@@ -397,7 +402,7 @@ public class SSOClient implements ISSOClient {
         attribute.setKey(key);
         
         Protocol proto = new Protocol();
-        proto.setOperation(ISSOClient.Operation.SESSION_ATTR_SET.getValue());
+        proto.setOperation(Operation.SESSION_ATTR_GET.getValue());
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
 

@@ -52,57 +52,12 @@ public interface ISSOClient {
     
     public void login(String sessionId, String userId, String userInfo, ResponseListener<Session> response);
     
-    public void logout(String sessionId, ResponseListener<Session> response);
+    public void logout(String sessionId, ResponseListener<Entity> response);
     
     public void getSession(String sessionId, ResponseListener<Session> response);
     
-    public void setAttribute(String sessionId, String key, String value, ResponseListener<Entity> response);
+    public void setAttribute(String sessionId, String key, String value, ResponseListener<Attribute> response);
 
     public void getAttribute(String sessionId, String key, ResponseListener<Attribute> response);
     
-    public static enum Operation {
-        /** 连接授权 */
-        CONN_AUTH(1),
-
-        /** 用户报道 */
-        USER_REPORT(2),
-        /** 用户登入 */
-        USER_LOGIN(8),
-        /** 用户退出 */
-        USER_LOGOUT(9),
-        /** 用户信息编辑 */
-        USER_EDIT(10),
-
-        /** Session Create */
-        //SESSION_CREATE(3),
-        /** Session Update */
-        //SESSION_UPDATE(4),
-        /** Session Revove */
-        //SESSION_REMOVE(5)
-        /** Session属性设置 */
-        SESSION_ATTR_SET(6),
-        /** Session属性获取 */
-        SESSION_ATTR_GET(7),
-        /** Session对象获取 */
-        SESSION_GET(11);
-
-        private final int value;
-
-        private Operation(int value) {
-            this.value = value;
-        }
-
-        public final int getValue() {
-            return value;
-        }
-
-        public static Operation getInstance(int v) {
-            for (Operation type : Operation.values()) {
-                if (type.getValue() == v) {
-                    return type;
-                }
-            }
-            return null;
-        }
-    }    
 }

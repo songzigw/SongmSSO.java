@@ -24,15 +24,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import songm.sso.backstage.ISSOClient.Operation;
-import songm.sso.backstage.entity.Attribute;
-import songm.sso.backstage.entity.Backstage;
-import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Protocol;
-import songm.sso.backstage.entity.Session;
-import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
-import songm.sso.backstage.utils.JsonUtils;
+import songm.sso.backstage.handler.Handler;
+import songm.sso.backstage.handler.HandlerManager;
 
 /**
  * 事件消息处理
@@ -49,48 +44,21 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
             .getLogger(SSOClientHandler.class);
 
     private ActionListenerManager listenerManager;
+    private HandlerManager handlerManager;
 
     public SSOClientHandler(ActionListenerManager listenerManager) {
         this.listenerManager = listenerManager;
+        this.handlerManager = new HandlerManager();
     }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
-        int oper = pro.getOperation();
-
-        if (oper == Operation.CONN_AUTH.getValue()) {
-            triggerConnAuth(pro);
-        } else if (oper == Operation.USER_REPORT.getValue()) {
-            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
-            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
-        } else if (oper == Operation.USER_LOGIN.getValue()) {
-            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
-            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
-        } else if (oper == Operation.USER_LOGOUT.getValue()) {
-            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
-            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
-        } else if (oper == Operation.USER_EDIT.getValue()) {
-            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
-            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
-        } else if (oper == Operation.SESSION_GET.getValue()) {
-            Session session = JsonUtils.fromJson(pro.getBody(), Session.class);
-            listenerManager.trigger(EventType.RESPONSE, session, pro.getSequence());
-        } else if (oper == Operation.SESSION_ATTR_GET.getValue()) {
-            Attribute attr = JsonUtils.fromJson(pro.getBody(), Attribute.class);
-            listenerManager.trigger(EventType.RESPONSE, attr, pro.getSequence());
-        } else if (oper == Operation.SESSION_ATTR_SET.getValue()) {
-            Entity ent = JsonUtils.fromJson(pro.getBody(), Entity.class);
-            listenerManager.trigger(EventType.RESPONSE, ent, pro.getSequence());
-        }
-    }
-
-    private void triggerConnAuth(Protocol pro) {
-        Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
-        if (back.getSucceed()) {
-            listenerManager.trigger(EventType.CONNECTED, back, null);
+        Handler handler = handlerManager.find(pro.getOperation());
+        if (handler != null) {
+            handler.action(listenerManager, pro);
         } else {
-            listenerManager.trigger(EventType.DISCONNECTED, back, null);
+            LOG.warn("Not found handler: " + pro.getOperation());
         }
     }
 
