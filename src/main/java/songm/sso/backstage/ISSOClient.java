@@ -32,7 +32,16 @@ import songm.sso.backstage.event.ResponseListener;
  * 
  */
 public interface ISSOClient {
+    
+    /** 连接断开 */
+    public static final int DISCONNECTED = 0;
+    /** 连接上了 */
+    public static final int CONNECTED = 1;
+    /** 正在连接 */
+    public static final int CONNECTING = 2;
 
+    public int getConnState();
+    
     public void addListener(ConnectionListener listener);
 
     public void connect(String key, String secret) throws SSOException;

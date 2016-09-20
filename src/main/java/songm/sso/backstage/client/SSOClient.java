@@ -70,6 +70,8 @@ public class SSOClient implements ISSOClient {
     private ChannelFuture channelFuture;
     private ConnectionListener connectionListener;
 
+    private int connState;
+    
     private static SSOClient instance;
 
     private SSOClient(String host, int port) {
@@ -86,6 +88,7 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                connState = CONNECTING;
                 if (connectionListener != null) {
                     connectionListener.onConnecting();
                 }
@@ -95,6 +98,7 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                connState = CONNECTED;
                 backstage = (Backstage) event.getData();
                 if (connectionListener != null) {
                     connectionListener.onConnected(backstage);
@@ -105,6 +109,7 @@ public class SSOClient implements ISSOClient {
         listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                connState = DISCONNECTED;
                 backstage = (Backstage) event.getData();
                 if (connectionListener != null) {
                     connectionListener.onDisconnected(ErrorCode.valueOf(
@@ -142,6 +147,9 @@ public class SSOClient implements ISSOClient {
     public void connect(String key, String secret) throws SSOException {
         LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
 
+        if (connState == CONNECTED || connState == CONNECTING) {
+            return;
+        }
         listenerManager.trigger(EventType.CONNECTING, key, null);
 
         Bootstrap b = new Bootstrap();
@@ -417,6 +425,11 @@ public class SSOClient implements ISSOClient {
         });
 
         channelFuture.channel().writeAndFlush(proto);
+    }
+
+    @Override
+    public int getConnState() {
+        return this.connState;
     }
     
 }
