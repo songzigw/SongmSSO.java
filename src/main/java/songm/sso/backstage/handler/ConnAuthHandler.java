@@ -16,8 +16,8 @@
  */
 package songm.sso.backstage.handler;
 
+import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
-import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.utils.JsonUtils;
@@ -31,11 +31,11 @@ public class ConnAuthHandler implements Handler {
 
     @Override
     public void action(ActionListenerManager listenerManager, Protocol pro) {
-        Session ses = JsonUtils.fromJson(pro.getBody(), Session.class);
-        if (ses.getSucceed()) {
-            listenerManager.trigger(EventType.CONNECTED, ses, null);
+        Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
+        if (back.getSucceed()) {
+            listenerManager.trigger(EventType.CONNECTED, back, null);
         } else {
-            listenerManager.trigger(EventType.DISCONNECTED, ses, null);
+            listenerManager.trigger(EventType.DISCONNECTED, back, null);
         }
     }
 

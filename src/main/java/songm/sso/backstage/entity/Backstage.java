@@ -29,14 +29,14 @@ public class Backstage extends Entity {
 
     private static final long serialVersionUID = 2846096768501798052L;
 
+    /** 后台客户端唯一标识 */
+    private String backId;
+
     private String serverKey;
     private String nonce;
     private long timestamp;
     private String signature;
 
-    /** 后台客户端唯一标识 */
-    private String backId;
-    
     public String getServerKey() {
         return serverKey;
     }

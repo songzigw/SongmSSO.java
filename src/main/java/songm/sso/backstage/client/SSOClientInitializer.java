@@ -22,11 +22,11 @@ public class SSOClientInitializer extends ChannelInitializer<SocketChannel> {
     private ProtocolCodec protocolCodec;
     private SSOClientHandler clientHandler;
 
-    public SSOClientInitializer(ActionListenerManager listenerManager) {
+    public SSOClientInitializer(ActionListenerManager listenerManager, String key, String secret) {
         protocolCodec = new ProtocolCodec();
-        clientHandler = new SSOClientHandler(listenerManager);
+        clientHandler = new SSOClientHandler(listenerManager, key, secret);
     }
-    
+
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline().addLast(protocolCodec);

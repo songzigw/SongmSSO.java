@@ -24,10 +24,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.handler.Handler;
 import songm.sso.backstage.handler.HandlerManager;
+import songm.sso.backstage.handler.Handler.Operation;
+import songm.sso.backstage.utils.CodeUtils;
+import songm.sso.backstage.utils.JsonUtils;
 
 /**
  * 事件消息处理
@@ -45,10 +49,38 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
 
     private ActionListenerManager listenerManager;
     private HandlerManager handlerManager;
+    private String key, secret;
 
-    public SSOClientHandler(ActionListenerManager listenerManager) {
+    public SSOClientHandler(ActionListenerManager listenerManager, String key, String secret) {
         this.listenerManager = listenerManager;
         this.handlerManager = new HandlerManager();
+        this.key = key;
+        this.secret = secret;
+    }
+
+    private void authorization(ChannelHandlerContext ctx) throws InterruptedException {
+        String nonce = String.valueOf(Math.random() * 1000000);
+        long timestamp = System.currentTimeMillis();
+        StringBuilder toSign = new StringBuilder(secret)
+                        .append(nonce).append(timestamp);
+        String sign = CodeUtils.sha1(toSign.toString());
+
+        Backstage back = new Backstage();
+        back.setServerKey(key);
+        back.setNonce(nonce);
+        back.setTimestamp(timestamp);
+        back.setSignature(sign);
+
+        Protocol proto = new Protocol();
+        proto.setOperation(Operation.CONN_AUTH.getValue());
+        proto.setBody(JsonUtils.toJsonBytes(back, back.getClass()));
+
+        ctx.channel().writeAndFlush(proto).await();
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        authorization(ctx);
     }
 
     @Override
@@ -63,6 +95,12 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     }
 
     @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        super.channelRead(ctx, msg);
+        System.out.println("====================================channelRead");
+    }
+
+    @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("HandlerRemoved", ctx);
     }
@@ -72,4 +110,5 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
             throws Exception {
         LOG.error("ExceptionCaught", cause);
     }
+
 }

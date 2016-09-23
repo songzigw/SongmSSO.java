@@ -17,18 +17,17 @@
 
 package songm.sso.backstage.client;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
-
 import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import songm.sso.backstage.ISSOClient;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import songm.sso.backstage.SSOClient;
 import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Attribute;
@@ -45,7 +44,6 @@ import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
 import songm.sso.backstage.handler.Handler.Operation;
-import songm.sso.backstage.utils.CodeUtils;
 import songm.sso.backstage.utils.JsonUtils;
 
 /**
@@ -55,32 +53,30 @@ import songm.sso.backstage.utils.JsonUtils;
  * @since   0.1, 2016-7-29
  * @version 0.1
  * 
- * @see #ISSOClient
+ * @see #SSOClient
  * 
  */
-public class SSOClient implements ISSOClient {
+public class SSOClientImpl implements SSOClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SSOClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SSOClientImpl.class);
 
     private final String host;
     private final int port;
 
     private final ActionListenerManager listenerManager;
     private final EventLoopGroup group;
-    private final SSOClientInitializer clientInit;
+    
+    private SSOClientInitializer clientInit;
     private ChannelFuture channelFuture;
     private ConnectionListener connectionListener;
 
     private int connState;
     
-    private static SSOClient instance;
-
-    private SSOClient(String host, int port) {
+    private SSOClientImpl(String host, int port) {
         this.host = host;
         this.port = port;
         this.group = new NioEventLoopGroup();
         this.listenerManager = new ActionListenerManager();
-        this.clientInit = new SSOClientInitializer(listenerManager);
         this.init();
     }
 
@@ -120,16 +116,16 @@ public class SSOClient implements ISSOClient {
         });
     }
 
-    public static SSOClient getInstance() {
+    private static SSOClientImpl instance;
+    public static SSOClientImpl getInstance() {
         if (instance == null) {
             throw new NullPointerException("SSOClient not init");
         }
         return instance;
     }
 
-    public static SSOClient init(String host, int port) {
-        instance = new SSOClient(host, port);
-        return instance;
+    public static SSOClientImpl init(String host, int port) {
+        return new SSOClientImpl(host, port);
     }
 
     public Backstage getBacstage() {
@@ -146,23 +142,24 @@ public class SSOClient implements ISSOClient {
 
     @Override
     public void connect(String key, String secret) throws SSOException {
-        LOG.info("Connecting SongmSSO Server... Host:{} Port:{}", host, port);
-
         if (connState == CONNECTED || connState == CONNECTING) {
             return;
         }
-        listenerManager.trigger(EventType.CONNECTING, key, null);
+
+        LOG.info("Connecting SongmSSO Server Host={} Port={}", host, port);
+        this.clientInit = new SSOClientInitializer(listenerManager, key, secret);
+        listenerManager.trigger(EventType.CONNECTING, null, null);
 
         Bootstrap b = new Bootstrap();
         b.group(group);
         b.channel(NioSocketChannel.class);
-        b.remoteAddress(host, port);
         b.handler(clientInit);
+        b.remoteAddress(host, port);
 
         try {
             // 与服务器建立连接
-            channelFuture = b.connect().sync();
-            this.auth(key, secret);
+            channelFuture = b.connect().await();
+            System.out.println("=================与服务器建立连接");
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Connect failure", e);
@@ -180,26 +177,6 @@ public class SSOClient implements ISSOClient {
         if (group != null) {
             group.shutdownGracefully();
         }
-    }
-
-    private void auth(String key, String secret) throws InterruptedException {
-        String nonce = String.valueOf(Math.random() * 1000000);
-        long timestamp = System.currentTimeMillis();
-        StringBuilder toSign = new StringBuilder(secret)
-                        .append(nonce).append(timestamp);
-        String sign = CodeUtils.sha1(toSign.toString());
-
-        backstage = new Backstage();
-        backstage.setServerKey(key);
-        backstage.setNonce(nonce);
-        backstage.setTimestamp(timestamp);
-        backstage.setSignature(sign);
-
-        Protocol proto = new Protocol();
-        proto.setOperation(Operation.CONN_AUTH.getValue());
-        proto.setBody(JsonUtils.toJson(backstage, Backstage.class).getBytes());
-
-        channelFuture.channel().writeAndFlush(proto).sync();
     }
 
     @Override

@@ -31,7 +31,7 @@ import songm.sso.backstage.event.ResponseListener;
  * @version 0.1
  * 
  */
-public interface ISSOClient {
+public interface SSOClient {
     
     /** 连接断开 */
     public static final int DISCONNECTED = 0;
