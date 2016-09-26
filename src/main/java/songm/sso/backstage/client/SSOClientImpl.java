@@ -75,8 +75,8 @@ public class SSOClientImpl implements SSOClient {
     private SSOClientImpl(String host, int port) {
         this.host = host;
         this.port = port;
-        this.group = new NioEventLoopGroup();
         this.listenerManager = new ActionListenerManager();
+        this.group = new NioEventLoopGroup();
         this.init();
     }
 
