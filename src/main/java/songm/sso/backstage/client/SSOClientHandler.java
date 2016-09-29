@@ -92,12 +92,14 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
         } else {
             LOG.warn("Not found handler: " + pro.getOperation());
         }
+        LOG.debug("MessageReceived: {}", pro);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        LOG.debug("ChannelRead: {}", msg);
         super.channelRead(ctx, msg);
-        System.out.println("====================================channelRead");
+        
     }
 
     @Override

@@ -158,8 +158,7 @@ public class SSOClientImpl implements SSOClient {
 
         try {
             // 与服务器建立连接
-            channelFuture = b.connect().await();
-            System.out.println("=================与服务器建立连接");
+            channelFuture = b.connect().sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Connect failure", e);
@@ -191,7 +190,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.USER_REPORT.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -216,7 +215,11 @@ public class SSOClientImpl implements SSOClient {
             }
         });
 
-        channelFuture.channel().writeAndFlush(proto);
+        //try {
+            channelFuture.channel().writeAndFlush(proto).syncUninterruptibly();
+        //} catch (InterruptedException e) {
+        //    LOG.error("Report", e);
+        //}
     }
 
     @Override
@@ -230,7 +233,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.USER_LOGIN.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(user, User.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(user, User.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -265,7 +268,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.USER_LOGOUT.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -300,7 +303,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.SESSION_GET.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(session, Session.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -343,7 +346,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.SESSION_ATTR_SET.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(attribute, Attribute.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
@@ -381,7 +384,7 @@ public class SSOClientImpl implements SSOClient {
         Protocol proto = new Protocol();
         proto.setOperation(Operation.SESSION_ATTR_GET.getValue());
         proto.setSequence(new Date().getTime());
-        proto.setBody(JsonUtils.toJson(attribute, Attribute.class).getBytes());
+        proto.setBody(JsonUtils.toJsonBytes(attribute, Attribute.class));
 
         listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
 
