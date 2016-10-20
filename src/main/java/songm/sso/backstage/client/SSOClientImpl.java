@@ -151,8 +151,8 @@ public class SSOClientImpl implements SSOClient {
         }
 
         LOG.info("Connecting SongmSSO Server Host={} Port={}", host, port);
-        this.clientInit = new SSOClientInitializer(listenerManager, key, secret);
         listenerManager.trigger(EventType.CONNECTING, null, null);
+        this.clientInit = new SSOClientInitializer(listenerManager, key, secret);
 
         Bootstrap b = new Bootstrap();
         b.group(group);

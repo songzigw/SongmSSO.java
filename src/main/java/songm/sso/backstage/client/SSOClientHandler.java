@@ -16,19 +16,21 @@
  */
 package songm.sso.backstage.client;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.entity.Result;
+import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.handler.Handler;
-import songm.sso.backstage.handler.HandlerManager;
 import songm.sso.backstage.handler.Handler.Operation;
+import songm.sso.backstage.handler.HandlerManager;
 import songm.sso.backstage.utils.CodeUtils;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -102,6 +104,9 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("HandlerRemoved", ctx);
+        Result<Object> res = new Result<Object>();
+        res.setErrorCode(ErrorCode.CONN_ERROR.name());
+        listenerManager.trigger(EventType.DISCONNECTED, res, null);
     }
 
     @Override
