@@ -14,7 +14,6 @@
  * limitations under the License.
  * 
  */
-
 package songm.sso.backstage.client;
 
 import java.util.Date;
@@ -32,17 +31,17 @@ import songm.sso.backstage.SSOException;
 import songm.sso.backstage.SSOException.ErrorCode;
 import songm.sso.backstage.entity.Attribute;
 import songm.sso.backstage.entity.Backstage;
-import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.entity.Result;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.entity.User;
 import songm.sso.backstage.event.AbstractListener;
 import songm.sso.backstage.event.ActionEvent;
 import songm.sso.backstage.event.ActionEvent.EventType;
-import songm.sso.backstage.event.ActionListener;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.event.ConnectionListener;
 import songm.sso.backstage.event.ResponseListener;
+import songm.sso.backstage.event.SequenceListener;
 import songm.sso.backstage.handler.Handler.Operation;
 import songm.sso.backstage.utils.JsonUtils;
 
@@ -82,9 +81,9 @@ public class SSOClientImpl implements SSOClient {
 
     private Backstage backstage;
     private void init() {
-        listenerManager.addListener(EventType.CONNECTING, new AbstractListener() {
+        listenerManager.addListener(EventType.CONNECTING, new AbstractListener<Backstage>() {
             @Override
-            public void actionPerformed(ActionEvent event) {
+            public void actionPerformed(ActionEvent<Backstage> event) {
                 connState = CONNECTING;
                 if (connectionListener != null) {
                     connectionListener.onConnecting();
@@ -92,25 +91,25 @@ public class SSOClientImpl implements SSOClient {
             }
         });
         
-        listenerManager.addListener(EventType.CONNECTED, new AbstractListener() {
+        listenerManager.addListener(EventType.CONNECTED, new AbstractListener<Backstage>() {
             @Override
-            public void actionPerformed(ActionEvent event) {
+            public void actionPerformed(ActionEvent<Backstage> event) {
                 connState = CONNECTED;
-                backstage = (Backstage) event.getData();
+                backstage = event.getResult().getData();
                 if (connectionListener != null) {
                     connectionListener.onConnected(backstage);
                 }
             }
         });
         
-        listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener() {
+        listenerManager.addListener(EventType.DISCONNECTED, new AbstractListener<Backstage>() {
             @Override
-            public void actionPerformed(ActionEvent event) {
+            public void actionPerformed(ActionEvent<Backstage> event) {
                 connState = DISCONNECTED;
-                backstage = (Backstage) event.getData();
+                Result<Backstage> res = event.getResult();
                 if (connectionListener != null) {
-                    connectionListener.onDisconnected(ErrorCode.valueOf(
-                            backstage.getErrorCode()));
+                    connectionListener.onDisconnected(
+                            ErrorCode.valueOf(res.getErrorCode()));
                 }
             }
         });
@@ -138,6 +137,11 @@ public class SSOClientImpl implements SSOClient {
 
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public int getConnState() {
+        return this.connState;
     }
 
     @Override
@@ -183,8 +187,15 @@ public class SSOClientImpl implements SSOClient {
         this.connectionListener = listener;
     }
 
+    private <T> ResponseListener<T> request(Protocol proto) {
+        SequenceListener<T> lir = new SequenceListener<T>(proto.getSequence());
+        listenerManager.addListener(EventType.RESPONSE, lir);
+        channelFuture.channel().writeAndFlush(proto);
+        return lir.getResponse();
+    }
+    
     @Override
-    public void report(String sessionId, ResponseListener<Session> response) {
+    public Session report(String sessionId) throws SSOException {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
@@ -192,39 +203,11 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Session ent = (Session) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        //try {
-            channelFuture.channel().writeAndFlush(proto).syncUninterruptibly();
-        //} catch (InterruptedException e) {
-        //    LOG.error("Report", e);
-        //}
+        return (Session) this.request(proto).handle();
     }
 
     @Override
-    public void login(String sessionId, String userId, String userInfo,
-            ResponseListener<Session> response) {
+    public Session login(String sessionId, String userId, String userInfo) throws SSOException {
         User user = new User();
         user.setSesId(sessionId);
         user.setUserId(userId);
@@ -235,34 +218,15 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(user, User.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Session ent = (Session) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        channelFuture.channel().writeAndFlush(proto);
+        //SequenceListener<Session> sLis = new SequenceListener<Session>(proto.getSequence());
+        //listenerManager.addListener(EventType.RESPONSE, sLis);
+        //channelFuture.channel().writeAndFlush(proto);
+        
+        return (Session) this.request(proto).handle();
     }
-
+    
     @Override
-    public void logout(String sessionId, ResponseListener<Entity> response) {
+    public void logout(String sessionId) throws SSOException {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
@@ -270,34 +234,11 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Entity ent = (Entity) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        channelFuture.channel().writeAndFlush(proto);
+        this.request(proto).handle();
     }
 
     @Override
-    public void getSession(String sessionId, ResponseListener<Session> response) {
+    public Session getSession(String sessionId) throws SSOException {
         Session session = new Session(sessionId);
         
         Protocol proto = new Protocol();
@@ -305,35 +246,11 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(session, Session.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Session ent = (Session) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        channelFuture.channel().writeAndFlush(proto);
+        return (Session) this.request(proto).handle();
     }
 
     @Override
-    public void setAttribute(String sessionId, String key, String value,
-            ResponseListener<Attribute> response) {
+    public void setAttribute(String sessionId, String key, String value) throws SSOException {
         if (Session.USER_INFO.equals(key)) {
             throw new IllegalArgumentException("Argument 'key' does not allow for " + key);
         }
@@ -348,35 +265,11 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(attribute, Attribute.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Attribute ent = (Attribute) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        channelFuture.channel().writeAndFlush(proto);
+        this.request(proto).handle();
     }
 
     @Override
-    public void getAttribute(String sessionId, String key,
-            ResponseListener<Attribute> response) {
+    public void getAttribute(String sessionId, String key) throws SSOException {
         Attribute attribute = new Attribute();
         attribute.setSesId(sessionId);
         attribute.setKey(key);
@@ -386,35 +279,7 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(attribute, Attribute.class));
 
-        listenerManager.addListener(EventType.RESPONSE, new ActionListener() {
-
-            private Long sequence = proto.getSequence();
-
-            @Override
-            public Long getSequence() {
-                return sequence;
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (response == null) {
-                    return;
-                }
-                Attribute ent = (Attribute) event.getData();
-                if (ent.getSucceed()) {
-                    response.onSuccess(ent);
-                } else {
-                    response.onError(ErrorCode.valueOf(ent.getErrorCode()));
-                }
-            }
-        });
-
-        channelFuture.channel().writeAndFlush(proto);
+        this.request(proto).handle();
     }
 
-    @Override
-    public int getConnState() {
-        return this.connState;
-    }
-    
 }

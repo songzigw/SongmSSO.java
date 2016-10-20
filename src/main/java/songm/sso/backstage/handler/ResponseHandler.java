@@ -16,9 +16,13 @@
  */
 package songm.sso.backstage.handler;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.reflect.TypeToken;
+
 import songm.sso.backstage.entity.Attribute;
-import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Protocol;
+import songm.sso.backstage.entity.Result;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.entity.User;
 import songm.sso.backstage.event.ActionEvent.EventType;
@@ -34,42 +38,35 @@ public class ResponseHandler implements Handler {
 
     @Override
     public void action(ActionListenerManager listenerManager, Protocol pro) {
-        Entity ent = null;
+        Result<?> res = null;
+        Type type = null;
+
         if (pro.getOperation() == Handler.Operation.USER_REPORT.getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Session.class);
-
-        } else if (pro.getOperation() == Handler.Operation.USER_LOGIN
-                .getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Session.class);
-
-        } else if (pro.getOperation() == Handler.Operation.USER_LOGOUT
-                .getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Entity.class);
-
+            type = new TypeToken<Result<Session>>() {
+            }.getType();
+        } else if (pro.getOperation() == Handler.Operation.USER_LOGIN.getValue()) {
+            type = new TypeToken<Result<Session>>() {
+            }.getType();
+            res = JsonUtils.fromJson(pro.getBody(), type);
+        } else if (pro.getOperation() == Handler.Operation.USER_LOGOUT.getValue()) {
+            type = new TypeToken<Result<?>>() {
+            }.getType();
         } else if (pro.getOperation() == Handler.Operation.USER_EDIT.getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), User.class);
-
-        } else if (pro.getOperation() == Handler.Operation.SESSION_GET
-                .getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Session.class);
-
-        } else if (pro.getOperation() == Handler.Operation.SESSION_ATTR_GET
-                .getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Attribute.class);
-
-        } else if (pro.getOperation() == Handler.Operation.SESSION_ATTR_SET
-                .getValue()) {
-
-            ent = JsonUtils.fromJson(pro.getBody(), Attribute.class);
-
+            type = new TypeToken<Result<User>>() {
+            }.getType();
+        } else if (pro.getOperation() == Handler.Operation.SESSION_GET.getValue()) {
+            type = new TypeToken<Result<Session>>() {
+            }.getType();
+        } else if (pro.getOperation() == Handler.Operation.SESSION_ATTR_GET.getValue()) {
+            type = new TypeToken<Result<Attribute>>() {
+            }.getType();
+        } else if (pro.getOperation() == Handler.Operation.SESSION_ATTR_SET.getValue()) {
+            type = new TypeToken<Result<Attribute>>() {
+            }.getType();
         }
-        listenerManager.trigger(EventType.RESPONSE, ent, pro.getSequence());
+
+        res = JsonUtils.fromJson(pro.getBody(), type);
+        listenerManager.trigger(EventType.RESPONSE, res, pro.getSequence());
     }
 
 }

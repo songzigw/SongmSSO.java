@@ -16,12 +16,14 @@
  */
 package songm.sso.backstage.entity;
 
+import java.io.Serializable;
+
 /**
  * 用户
  * @author zhangsong
  *
  */
-public class User extends Entity {
+public class User implements Serializable {
 
     private static final long serialVersionUID = 6942944866458532639L;
     

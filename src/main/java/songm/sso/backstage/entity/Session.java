@@ -16,6 +16,7 @@
  */
 package songm.sso.backstage.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ import java.util.Map;
  * @version 0.1
  * 
  */
-public class Session extends Entity {
+public class Session implements Serializable {
 
     private static final long serialVersionUID = 3367972053942347508L;
 

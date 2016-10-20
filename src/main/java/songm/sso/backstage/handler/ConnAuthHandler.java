@@ -16,11 +16,16 @@
  */
 package songm.sso.backstage.handler;
 
+import java.lang.reflect.Type;
+
+import com.google.gson.reflect.TypeToken;
+
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Protocol;
 import songm.sso.backstage.event.ActionEvent.EventType;
 import songm.sso.backstage.event.ActionListenerManager;
 import songm.sso.backstage.utils.JsonUtils;
+import songm.sso.backstage.entity.Result;
 
 public class ConnAuthHandler implements Handler {
 
@@ -31,11 +36,12 @@ public class ConnAuthHandler implements Handler {
 
     @Override
     public void action(ActionListenerManager listenerManager, Protocol pro) {
-        Backstage back = JsonUtils.fromJson(pro.getBody(), Backstage.class);
-        if (back.getSucceed()) {
-            listenerManager.trigger(EventType.CONNECTED, back, null);
+        Type type = new TypeToken<Result<Backstage>>() {}.getType();
+        Result<Backstage> res = JsonUtils.fromJson(pro.getBody(), type);
+        if (res.getSucceed()) {
+            listenerManager.trigger(EventType.CONNECTED, res, null);
         } else {
-            listenerManager.trigger(EventType.DISCONNECTED, back, null);
+            listenerManager.trigger(EventType.DISCONNECTED, res, null);
         }
     }
 

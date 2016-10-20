@@ -17,11 +17,8 @@
 
 package songm.sso.backstage;
 
-import songm.sso.backstage.entity.Attribute;
-import songm.sso.backstage.entity.Entity;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ConnectionListener;
-import songm.sso.backstage.event.ResponseListener;
 
 /**
  * 后台客户端接口
@@ -48,16 +45,16 @@ public interface SSOClient {
 
     public void disconnect();
     
-    public void report(String sessionId, ResponseListener<Session> response);
+    public Session report(String sessionId) throws SSOException;
     
-    public void login(String sessionId, String userId, String userInfo, ResponseListener<Session> response);
+    public Session login(String sessionId, String userId, String userInfo) throws SSOException;
     
-    public void logout(String sessionId, ResponseListener<Entity> response);
+    public void logout(String sessionId) throws SSOException;
     
-    public void getSession(String sessionId, ResponseListener<Session> response);
+    public Session getSession(String sessionId) throws SSOException;
     
-    public void setAttribute(String sessionId, String key, String value, ResponseListener<Attribute> response);
+    public void setAttribute(String sessionId, String key, String value) throws SSOException;
 
-    public void getAttribute(String sessionId, String key, ResponseListener<Attribute> response);
+    public void getAttribute(String sessionId, String key) throws SSOException;
     
 }

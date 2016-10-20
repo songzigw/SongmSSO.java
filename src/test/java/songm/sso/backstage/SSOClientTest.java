@@ -8,7 +8,6 @@ import songm.sso.backstage.client.SSOClientImpl;
 import songm.sso.backstage.entity.Backstage;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ConnectionListener;
-import songm.sso.backstage.event.ResponseListener;
 
 public class SSOClientTest {
     
@@ -41,18 +40,19 @@ public class SSOClientTest {
             @Override
             public void onConnected(Backstage backstage) {
                 System.out.println("===============Connected: " + backstage.getBackId());
-                ssoClient.report(null, new ResponseListener<Session>() {
+                Thread t = new Thread() {
                     @Override
-                    public void onSuccess(Session entity) {
-                        System.out.println("===============Success: " + entity.getSesId());
+                    public void run() {
+                        Session entity = null;
+                        try {
+                            entity = ssoClient.report(null);
+                            System.out.println("===============Success: " + entity.getSesId());
+                        } catch (SSOException e) {
+                            System.out.println("===============Error: " + e.getErrorCode().name());
+                        }
                     }
-                    
-                    @Override
-                    public void onError(ErrorCode errorCode) {
-                        System.out.println("===============Error: " + errorCode.name());
-                    }
-                });
-                System.out.println("===============Report end");
+                };
+                t.start();
             }
         });
     }

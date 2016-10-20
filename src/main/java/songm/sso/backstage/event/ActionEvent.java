@@ -2,17 +2,19 @@ package songm.sso.backstage.event;
 
 import java.util.EventObject;
 
-public class ActionEvent extends EventObject {
+import songm.sso.backstage.entity.Result;
+
+public class ActionEvent<T> extends EventObject {
 
     private static final long serialVersionUID = -6605811937291134933L;
 
     private Long sequence;
 
-    private Object data;
+    private Result<T> result;
 
-    public ActionEvent(EventType source, Object data, Long sequece) {
+    public ActionEvent(EventType source, Result<T> result, Long sequece) {
         super(source);
-        this.data = data;
+        this.result = result;
         this.sequence = sequece;
     }
 
@@ -21,8 +23,8 @@ public class ActionEvent extends EventObject {
         return (EventType) super.getSource();
     }
 
-    public Object getData() {
-        return data;
+    public Result<T> getResult() {
+        return result;
     }
 
     public Long getSequence() {

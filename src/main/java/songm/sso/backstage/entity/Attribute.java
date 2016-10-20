@@ -16,13 +16,15 @@
  */
 package songm.sso.backstage.entity;
 
+import java.io.Serializable;
+
 /**
  * 键值对属性描述
  * 
  * @author zhangsong
  *
  */
-public class Attribute extends Entity {
+public class Attribute implements Serializable {
 
     private static final long serialVersionUID = -7512600852429959890L;
 

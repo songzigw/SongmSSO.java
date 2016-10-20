@@ -1,5 +1,7 @@
 package songm.sso.backstage.utils;
 
+import java.lang.reflect.Type;
+
 import com.google.gson.Gson;
 
 public class JsonUtils {
@@ -26,4 +28,11 @@ public class JsonUtils {
         return fromJson(new String(json), clazz);
     }
 
+    public static <T> T fromJson(String str, Type type) {
+        return gson.fromJson(str, type);
+    }
+
+    public static <T> T fromJson(byte[] json, Type type) {
+        return fromJson(new String(json), type);
+    }
 }

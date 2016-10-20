@@ -14,7 +14,6 @@
  * limitations under the License.
  * 
  */
-
 package songm.sso.backstage.client;
 
 import io.netty.channel.ChannelHandler;
@@ -75,7 +74,7 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
         proto.setOperation(Operation.CONN_AUTH.getValue());
         proto.setBody(JsonUtils.toJsonBytes(back, back.getClass()));
 
-        ctx.channel().writeAndFlush(proto).await();
+        ctx.channel().writeAndFlush(proto);
     }
 
     @Override
@@ -86,20 +85,18 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Protocol pro)
             throws Exception {
+        LOG.debug("MessageReceived: {}", pro);
         Handler handler = handlerManager.find(pro.getOperation());
         if (handler != null) {
             handler.action(listenerManager, pro);
         } else {
             LOG.warn("Not found handler: " + pro.getOperation());
         }
-        LOG.debug("MessageReceived: {}", pro);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        LOG.debug("ChannelRead: {}", msg);
         super.channelRead(ctx, msg);
-        
     }
 
     @Override

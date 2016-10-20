@@ -62,5 +62,7 @@ public class SSOException extends Exception {
         AUTH_FAILURE,
         /** 授权失效 */
         AUTH_DISABLED,
+        
+        TIMEOUT,
     }
 }
