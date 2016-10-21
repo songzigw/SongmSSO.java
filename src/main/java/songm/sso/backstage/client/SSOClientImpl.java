@@ -146,12 +146,13 @@ public class SSOClientImpl implements SSOClient {
 
     @Override
     public void connect(String key, String secret) throws SSOException {
-        if (connState == CONNECTED || connState == CONNECTING) {
+        if (connState != DISCONNECTED) {
             return;
         }
 
         LOG.info("Connecting SongmSSO Server Host={} Port={}", host, port);
-        listenerManager.trigger(EventType.CONNECTING, null, null);
+        Result<Backstage> res = new Result<Backstage>();
+        listenerManager.trigger(EventType.CONNECTING, res, null);
         this.clientInit = new SSOClientInitializer(listenerManager, key, secret);
 
         Bootstrap b = new Bootstrap();
@@ -180,6 +181,7 @@ public class SSOClientImpl implements SSOClient {
         if (group != null) {
             group.shutdownGracefully();
         }
+        connState = DISCONNECTED;
     }
 
     @Override
