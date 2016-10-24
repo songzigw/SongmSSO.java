@@ -181,7 +181,11 @@ public class SSOClientImpl implements SSOClient {
         if (group != null) {
             group.shutdownGracefully();
         }
-        connState = DISCONNECTED;
+        if (connState != DISCONNECTED) {
+            Result<Backstage> res = new Result<Backstage>();
+            res.setErrorCode(ErrorCode.CONN_ERROR.name());
+            listenerManager.trigger(EventType.DISCONNECTED, res, null);
+        }
     }
 
     @Override

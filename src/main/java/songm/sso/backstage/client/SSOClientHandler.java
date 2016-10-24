@@ -104,7 +104,7 @@ public class SSOClientHandler extends SimpleChannelInboundHandler<Protocol> {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("HandlerRemoved", ctx);
-        Result<Object> res = new Result<Object>();
+        Result<Backstage> res = new Result<Backstage>();
         res.setErrorCode(ErrorCode.CONN_ERROR.name());
         listenerManager.trigger(EventType.DISCONNECTED, res, null);
     }
