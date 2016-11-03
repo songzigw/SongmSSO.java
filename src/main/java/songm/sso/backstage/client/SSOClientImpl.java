@@ -231,6 +231,11 @@ public class SSOClientImpl implements SSOClient {
         return (Session) this.request(proto).handle();
     }
     
+    public String getLogin(String sessionId) throws SSOException {
+        Attribute attr = this.getAttribute(sessionId, Session.USER_INFO);
+        return attr.getValue();
+    }
+    
     @Override
     public void logout(String sessionId) throws SSOException {
         Session session = new Session(sessionId);
@@ -275,7 +280,7 @@ public class SSOClientImpl implements SSOClient {
     }
 
     @Override
-    public void getAttribute(String sessionId, String key) throws SSOException {
+    public Attribute getAttribute(String sessionId, String key) throws SSOException {
         Attribute attribute = new Attribute();
         attribute.setSesId(sessionId);
         attribute.setKey(key);
@@ -285,7 +290,7 @@ public class SSOClientImpl implements SSOClient {
         proto.setSequence(new Date().getTime());
         proto.setBody(JsonUtils.toJsonBytes(attribute, Attribute.class));
 
-        this.request(proto).handle();
+        return (Attribute) this.request(proto).handle();
     }
 
 }

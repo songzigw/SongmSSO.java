@@ -17,6 +17,7 @@
 
 package songm.sso.backstage;
 
+import songm.sso.backstage.entity.Attribute;
 import songm.sso.backstage.entity.Session;
 import songm.sso.backstage.event.ConnectionListener;
 
@@ -55,6 +56,6 @@ public interface SSOClient {
     
     public void setAttribute(String sessionId, String key, String value) throws SSOException;
 
-    public void getAttribute(String sessionId, String key) throws SSOException;
+    public Attribute getAttribute(String sessionId, String key) throws SSOException;
     
 }
